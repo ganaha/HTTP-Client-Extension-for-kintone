@@ -1,0 +1,44 @@
+h3 {
+    margin: 0;
+    padding: 21px 0 13px;
+    color: #1EAEDB;
+}
+
+h5 {
+    margin-top: 20px;
+}
+
+input[type="text"][disabled]{
+    background:#DCDCDC;
+    cursor:not-allowed;
+}
+
+.custom-button {
+    color: #a8a8a8;
+    font-size: 32px;
+    display: inline-block;
+    padding: 0 16px;
+    height: 48px;
+    border: 1px solid #e3e7e8;
+    background-color: #f7f9fa;
+    text-align: center;
+}
+
+.custom-button:hover {
+    color: #3498db;
+}
+
+textarea, code {
+    font-family: 'Source Code Pro', monospace;
+}
+
+.hradio {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+pre > code {
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

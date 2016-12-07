@@ -1,0 +1,6 @@
+{
+    "extName": {
+        "message": "HTTP Client Extension for kintone",
+        "description": "Extension name."
+    }
+}

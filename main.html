@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>HTTP Client Extension for kintone</title>
+    <meta name="description" content="This extension is HTTP client of kintone REST API.">
+    <meta name="author" content="t.ganaha">
+
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600|Source+Code+Pro" rel="stylesheet" type="text/css">
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/forkit.css">
+    <link rel="stylesheet" href="https://js.cybozu.com/font-awesome/v4.7.0/css/font-awesome.min.css">
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+
+<body>
+
+    <!-- Primary Page Layout
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <div class="container" id="app">
+
+        <!-- The ribbon -->
+        <a class="forkit" target="_blank" data-text="API Docs" v-bind:href="docs"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkit.png" alt="Reference"></a>
+
+        <div class="row">
+            <!-- Request -->
+            <div class="six columns">
+                <h3>Request</h3>
+
+                <!-- Label -->
+                <div class="row">
+                    <div class="twelve columns">
+                        <label for="subdomainInput">Domain</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Subdomain -->
+                    <div class="six columns">
+                        <input class="u-full-width" type="text" placeholder="Subdomain" id="subdomainInput" v-model="form.subdomain">
+                    </div>
+                    <!-- Domain -->
+                    <div class="six columns">
+                        <select class="u-full-width" placeholder="Domain" id="domainInput" v-model="form.domain">
+                            <option v-for="domain in domains">{{ domain }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Label -->
+                <div class="row">
+                    <div class="twelve columns">
+                        <label for="apiInput">API</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- API -->
+                    <div class="five columns">
+                        <select class="u-full-width" id="apiInput" v-model="form.api" v-on:change="changeApi()">
+                            <option v-for="api in apis">{{ api.name }}</option>
+                        </select>
+                    </div>
+                    <!-- Guest Space -->
+                    <div class="four columns">
+                        <label>
+                            <input type="checkbox" id="guestInput" v-model="form.isGuest">
+                            <span>Guest Space</span>
+                        </label>
+                    </div>
+                    <div class="three columns">
+                        <input class="u-full-width" type="text" placeholder="Space ID" id="spaceIdInput" v-model="form.spaceId" v-bind:disabled="!form.isGuest">
+                    </div>
+                </div>
+
+                <!-- Method -->
+                <!-- <select class="u-full-width" id="methodInput" v-model="form.method">
+                    <option v-for="option in methods">{{ option }}</option>
+                </select> -->
+
+                <!-- URL -->
+                <input class="u-full-width" type="hidden" placeholder="URL" id="urlInput" v-model="url">
+
+                <!-- Label -->
+                <div class="row">
+                    <div class="twelve columns">
+                        <label for="">Authorization</label>
+                    </div>
+                </div>
+
+                <!-- Authorization -->
+                <div class="row">
+                    <!-- Authorization -->
+                    <div class="twelve columns">
+                        <label for="userAuthInput" class="hradio">
+                            <input type="radio" name="authorization" id="userAuthInput" value="user" v-model="form.authType" />
+                            <span class="label-body" for="userAuthInput">User</span>
+                        </label>
+                        <label for="tokenAuthInput" class="hradio">
+                            <input type="radio" name="authorization" id="tokenAuthInput" value="token" v-model="form.authType" />
+                            <span class="label-body" for="tokenAuthInput">API Token</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- User / Password -->
+                    <div class="twelve columns" v-if="form.authType === 'user'">
+                        <div class="six columns">
+                            <input class="u-full-width" type="text" placeholder="User" id="userInput" v-model="form.user">
+                        </div>
+                        <div class="six columns">
+                            <input class="u-full-width" type="password" placeholder="Password" id="passwordInput" v-model="form.password">
+                        </div>
+                    </div>
+                    <!-- API Token -->
+                    <div class="twelve columns" v-else>
+                        <input class="u-full-width" type="text" placeholder="API Token" id="tokenInput" v-model="form.token">
+                    </div>
+                </div>
+
+                <!-- Request Body -->
+                <div class="row">
+                    <div class="twelve columns" v-if="form.method === 'GET'">
+                        <label for="bodyInput">Request query string</label>
+                        <textarea class="u-full-width" placeholder="app=8&amp;id=100" style="height:139px;" id="bodyInput" v-model="form.params"></textarea>
+                    </div>
+                    <div class="twelve columns" v-else>
+                        <label for="bodyInput">Request body</label>
+                        <textarea class="u-full-width" placeholder="{&quot;app&quot;: 123}" style="height:139px;" id="bodyInput" v-model="form.params"></textarea>
+                    </div>
+                </div>
+
+                <!-- Send Button -->
+                <button class="button-primary u-full-width" type="submit" v-on:click="send">
+                    <span v-if="isSending">
+                        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                        <span class="sr-only">Sending...</span>
+                    </span>
+                    <span v-else>
+                        Send
+                    </span>
+                </button>
+
+            </div>
+
+            <!-- Response -->
+            <div class="six columns">
+                <h3>Response</h3>
+                <textarea class="u-full-width" id="responseInput" style="height:453px;" v-model="form.response"></textarea>
+            </div>
+
+        </div>
+
+        <!-- Note -->
+        <div>
+            <span>* Please specify the query string for GET request. </span><br />
+            <span>(This tool can not be specified in request body)</span>
+        </div>
+
+        <!-- Sample -->
+        <div>
+            <h5 v-if="form.method === 'GET'">Sample Query string</h5>
+            <h5 v-else>Sample Request body</h5>
+            <div>
+                <pre><code>{{ sample }}</code></pre>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- End Document
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+    <!-- JS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <script src="https://js.cybozu.com/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://js.cybozu.com/vuejs/v2.0.3/vue.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/forkit.js"></script>
+</body>
+
+</html>
